@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Bank Management System
 
 A comprehensive bank management system built with Spring Boot, MySQL, and React.
@@ -179,3 +180,6 @@ bank-management-system/
 ## License
 
 This project is licensed under the MIT License.
+=======
+# Bank-Management-System
+>>>>>>> d830beeeaea4ca18ec81aff2d1ce29b1642ac18b
