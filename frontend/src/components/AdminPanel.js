@@ -17,6 +17,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Button,
   Chip,
   IconButton
 } from '@mui/material';
@@ -25,11 +26,13 @@ import {
   AccountBalance,
   Receipt,
   TrendingUp,
+  Edit,
   Delete,
   Block,
   CheckCircle
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import userService from '../services/userService';
 import adminService from '../services/adminService';
 
 const AdminPanel = () => {
@@ -58,15 +61,12 @@ const AdminPanel = () => {
       ]);
       
       setStats(statsRes);
-      setUsers(Array.isArray(usersRes) ? usersRes : []);
-      setAccounts(Array.isArray(accountsRes) ? accountsRes : []);
-      setTransactions(Array.isArray(transactionsRes) ? transactionsRes : []);
+      setUsers(usersRes);
+      setAccounts(accountsRes);
+      setTransactions(transactionsRes);
     } catch (err) {
       setError('Failed to load admin data');
-      // Ensure arrays are still set to empty arrays on error
-      setUsers([]);
-      setAccounts([]);
-      setTransactions([]);
+      console.error('Admin data loading error:', err);
     } finally {
       setLoading(false);
     }
@@ -90,6 +90,7 @@ const AdminPanel = () => {
       loadAdminData(); // Reload data
     } catch (err) {
       setError(`Failed to ${action} user`);
+      console.error(`Error ${action} user:`, err);
     }
   };
 
@@ -126,7 +127,7 @@ const AdminPanel = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {users && users.map((user) => (
+          {users.map((user) => (
             <TableRow key={user.id}>
               <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
               <TableCell>{user.email}</TableCell>
@@ -190,7 +191,7 @@ const AdminPanel = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {accounts && accounts.map((account) => (
+          {accounts.map((account) => (
             <TableRow key={account.id}>
               <TableCell>{account.accountNumber}</TableCell>
               <TableCell>{account.user ? `${account.user.firstName} ${account.user.lastName}` : 'N/A'}</TableCell>
@@ -223,7 +224,7 @@ const AdminPanel = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {transactions && transactions.slice(0, 100).map((transaction) => (
+          {transactions.slice(0, 100).map((transaction) => (
             <TableRow key={transaction.id}>
               <TableCell>{transaction.transactionReference}</TableCell>
               <TableCell>{transaction.transactionType}</TableCell>

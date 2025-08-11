@@ -30,9 +30,7 @@ import {
   Security
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import accountService from '../services/accountService';
-import transactionService from '../services/transactionService';
-import adminService from '../services/adminService';
+import userService from '../services/userService';
 
 const Dashboard = () => {
   const { user, isAdmin, isEmployee, isCustomer } = useAuth();
@@ -53,22 +51,22 @@ const Dashboard = () => {
       if (isCustomer()) {
         // Load customer data
         const [accountsRes, transactionsRes] = await Promise.all([
-          accountService.getMyAccounts(),
-          transactionService.getMyTransactions()
+          userService.getMyAccounts(),
+          userService.getMyTransactions()
         ]);
         
-        setAccounts(accountsRes.data || accountsRes);
-        setTransactions((transactionsRes.data || transactionsRes)?.slice(0, 5) || []); // Latest 5 transactions
+        setAccounts(accountsRes.data);
+        setTransactions(transactionsRes.data.slice(0, 5)); // Latest 5 transactions
       } else if (isAdmin() || isEmployee()) {
         // Load admin/employee data
         const [accountsRes, transactionsRes, statsRes] = await Promise.all([
-          accountService.getAllAccounts(),
-          transactionService.getAllTransactions(),
-          isAdmin() ? adminService.getDashboardStats() : Promise.resolve({ data: null })
+          userService.getAllAccounts(),
+          userService.getAllTransactions(),
+          isAdmin() ? userService.getSystemStats() : Promise.resolve({ data: null })
         ]);
         
-        setAccounts(accountsRes.data || accountsRes);
-        setTransactions((transactionsRes.data || transactionsRes)?.slice(0, 10) || []); // Latest 10 for staff
+        setAccounts(accountsRes.data);
+        setTransactions(transactionsRes.data.slice(0, 10)); // Latest 10 for staff
         if (isAdmin()) {
           setAdminStats(statsRes.data);
         }

@@ -21,4 +21,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     List<User> findByIsActiveTrue();
     List<User> findByIsActiveFalse();
+    
+    // Bank-specific queries
+    List<User> findByBankId(Long bankId);
+    List<User> findByBankIdAndIsActiveTrue(Long bankId);
+    
+    @Query("SELECT COUNT(u) FROM User u WHERE u.bank.id = :bankId")
+    long countByBankId(@Param("bankId") Long bankId);
+    
+    @Query("SELECT COUNT(u) FROM User u WHERE u.bank.id = :bankId AND u.isActive = true")
+    long countByBankIdAndIsActiveTrue(@Param("bankId") Long bankId);
 }

@@ -29,4 +29,17 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     
     @Query("SELECT COUNT(a) FROM Account a WHERE a.user.id = :userId")
     long countByUserId(@Param("userId") Long userId);
+    
+    // Bank-specific queries
+    List<Account> findByBankId(Long bankId);
+    List<Account> findByBankIdAndAccountStatus(Long bankId, AccountStatus status);
+    
+    @Query("SELECT a FROM Account a WHERE a.bank.id = :bankId")
+    List<Account> findAllByBankId(@Param("bankId") Long bankId);
+    
+    @Query("SELECT COUNT(a) FROM Account a WHERE a.bank.id = :bankId")
+    long countByBankId(@Param("bankId") Long bankId);
+    
+    @Query("SELECT COUNT(a) FROM Account a WHERE a.bank.id = :bankId AND a.accountStatus = :status")
+    long countByBankIdAndAccountStatus(@Param("bankId") Long bankId, @Param("status") AccountStatus status);
 }

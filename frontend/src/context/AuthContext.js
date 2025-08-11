@@ -18,41 +18,77 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Decode token to get user info
-      try {
-        const userInfo = JSON.parse(atob(token.split('.')[1]));
-        setUser(userInfo);
-      } catch (error) {
-        console.error('Error decoding token:', error);
-        localStorage.removeItem('token');
-      }
+      // Call backend to get current user instead of decoding JWT
+      getCurrentUser();
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
+
+  const getCurrentUser = async () => {
+    try {
+      const response = await authService.getCurrentUser();
+      setUser(response.data);
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      // If token is invalid or user not found, clear all storage
+      localStorage.removeItem('token');
+      sessionStorage.clear();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const login = async (credentials) => {
     try {
+      console.log('Attempting login with:', { username: credentials.username });
       const response = await authService.login(credentials);
+      console.log('Login response:', response.data);
+      
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       setUser(user);
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.message || 
+                           error.response?.data?.error || 
+                           error.message || 
+                           'Login failed';
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Login failed' 
+        error: errorMessage
       };
     }
   };
 
   const register = async (userData) => {
     try {
+      console.log('Attempting registration with:', { ...userData, password: '[hidden]' });
       const response = await authService.register(userData);
+      console.log('Registration response:', response.data);
       return { success: true, data: response.data };
     } catch (error) {
+      console.error('Registration error:', error);
+      let errorMessage = 'Registration failed';
+      
+      if (error.response?.data?.errors) {
+        // Handle field-specific validation errors
+        const errors = error.response.data.errors;
+        const fieldErrors = Object.entries(errors).map(([field, msg]) => `${field}: ${msg}`);
+        errorMessage = fieldErrors.join(', ');
+      } else {
+        // Handle general error messages
+        errorMessage = error.response?.data?.message || 
+                      error.response?.data?.error || 
+                      error.message || 
+                      'Registration failed';
+      }
+      
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Registration failed' 
+        error: errorMessage
       };
     }
   };
@@ -62,12 +98,42 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const isAuthenticated = () => {
+    return !!user;
+  };
+
+  const hasRole = (role) => {
+    return user && user.role === role;
+  };
+
+  const isAdmin = () => {
+    return hasRole('ADMIN');
+  };
+
+  const isEmployee = () => {
+    return hasRole('EMPLOYEE');
+  };
+
+  const isCustomer = () => {
+    return hasRole('CUSTOMER');
+  };
+
+  const hasAnyRole = (roles) => {
+    return user && roles.includes(user.role);
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
-    loading
+    loading,
+    isAuthenticated,
+    hasRole,
+    isAdmin,
+    isEmployee,
+    isCustomer,
+    hasAnyRole
   };
 
   return (

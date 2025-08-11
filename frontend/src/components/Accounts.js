@@ -42,8 +42,7 @@ import {
   CheckCircle
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import accountService from '../services/accountService';
-import adminService from '../services/adminService';
+import userService from '../services/userService';
 import TransactionForm from '../components/TransactionForm';
 
 const Accounts = () => {
@@ -68,18 +67,13 @@ const Accounts = () => {
       setLoading(true);
       let response;
       
-      if (isAdmin()) {
-        // Admin sees ALL bank accounts
-        response = await adminService.getAdminAccounts();
-      } else if (isCustomer()) {
-        // Customers see only their own accounts
-        response = await accountService.getMyAccounts();
+      if (isCustomer()) {
+        response = await userService.getMyAccounts();
       } else {
-        // Employees see all accounts through regular endpoint
-        response = await accountService.getAllAccounts();
+        response = await userService.getAllAccounts();
       }
       
-      setAccounts(response.data || response);
+      setAccounts(response.data);
     } catch (err) {
       setError('Failed to load accounts');
       console.error('Load accounts error:', err);
@@ -91,7 +85,7 @@ const Accounts = () => {
   const handleCreateAccount = async () => {
     try {
       setLoading(true);
-      await accountService.createAccount(newAccount);
+      await userService.createAccount(newAccount);
       setCreateDialogOpen(false);
       setNewAccount({ accountType: 'SAVINGS' });
       loadAccounts();
@@ -104,7 +98,7 @@ const Accounts = () => {
 
   const handleUpdateAccountStatus = async (accountId, status) => {
     try {
-      await accountService.updateAccountStatus(accountId, status);
+      await userService.updateAccountStatus(accountId, status);
       loadAccounts();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update account status');
@@ -114,7 +108,7 @@ const Accounts = () => {
   const handleDeleteAccount = async (accountId) => {
     if (window.confirm('Are you sure you want to delete this account?')) {
       try {
-        await accountService.deleteAccount(accountId);
+        await userService.deleteAccount(accountId);
         loadAccounts();
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to delete account');
@@ -164,7 +158,7 @@ const Accounts = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">
-          {isAdmin() ? 'All Bank Accounts' : isEmployee() ? 'Account Management' : 'My Accounts'}
+          {isCustomer() ? 'My Accounts' : 'Account Management'}
         </Typography>
         
         {isCustomer() && (

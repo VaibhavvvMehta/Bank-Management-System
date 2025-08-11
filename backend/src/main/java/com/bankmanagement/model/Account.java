@@ -1,5 +1,7 @@
 package com.bankmanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -16,7 +18,6 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @NotBlank(message = "Account number is required")
     @Column(unique = true, nullable = false)
     private String accountNumber;
     
@@ -25,12 +26,10 @@ public class Account {
     @Column(nullable = false)
     private AccountType accountType;
     
-    @NotNull(message = "Balance is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Balance must be positive")
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal balance;
     
-    @NotNull(message = "Account status is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AccountStatus accountStatus;
@@ -43,12 +42,20 @@ public class Account {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bank_id", nullable = false)
+    @JsonIgnore
+    private Bank bank;
+    
     @OneToMany(mappedBy = "fromAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Transaction> outgoingTransactions;
     
     @OneToMany(mappedBy = "toAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Transaction> incomingTransactions;
     
     public Account() {
@@ -87,6 +94,9 @@ public class Account {
     
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+    
+    public Bank getBank() { return bank; }
+    public void setBank(Bank bank) { this.bank = bank; }
     
     public List<Transaction> getOutgoingTransactions() { return outgoingTransactions; }
     public void setOutgoingTransactions(List<Transaction> outgoingTransactions) { this.outgoingTransactions = outgoingTransactions; }

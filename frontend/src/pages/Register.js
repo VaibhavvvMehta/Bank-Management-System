@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Container,
@@ -9,10 +9,14 @@ import {
   Box,
   Alert,
   CircularProgress,
-  MenuItem
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select
 } from '@mui/material';
 import { AccountBalance } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -23,13 +27,32 @@ const Register = () => {
     lastName: '',
     phoneNumber: '',
     address: '',
-    role: 'CUSTOMER'
+    role: 'CUSTOMER',
+    bankId: ''
   });
+  const [banks, setBanks] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingBanks, setLoadingBanks] = useState(true);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchBanks();
+  }, []);
+
+  const fetchBanks = async () => {
+    try {
+      const response = await api.get('/auth/banks');
+      setBanks(response.data);
+    } catch (error) {
+      console.error('Error fetching banks:', error);
+      setError('Failed to load banks. Please refresh the page.');
+    } finally {
+      setLoadingBanks(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -38,10 +61,40 @@ const Register = () => {
     });
   };
 
+  const validateForm = () => {
+    if (formData.username.length < 3 || formData.username.length > 50) {
+      setError('Username must be between 3 and 50 characters');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+    if (!formData.email.includes('@')) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      setError('First name and last name are required');
+      return false;
+    }
+    if (!formData.bankId) {
+      setError('Please select a bank');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
 
     const result = await register(formData);
@@ -97,6 +150,11 @@ const Register = () => {
               value={formData.username}
               onChange={handleChange}
               autoFocus
+              inputProps={{ 
+                minLength: 3, 
+                maxLength: 50 
+              }}
+              helperText="Username must be between 3 and 50 characters"
             />
             <TextField
               margin="normal"
@@ -107,6 +165,10 @@ const Register = () => {
               type="password"
               value={formData.password}
               onChange={handleChange}
+              inputProps={{ 
+                minLength: 6 
+              }}
+              helperText="Password must be at least 6 characters"
             />
             <TextField
               margin="normal"
@@ -159,14 +221,43 @@ const Register = () => {
               value={formData.address}
               onChange={handleChange}
             />
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel>Select Bank</InputLabel>
+              <Select
+                name="bankId"
+                value={formData.bankId}
+                label="Select Bank"
+                onChange={handleChange}
+                disabled={loadingBanks}
+              >
+                {banks.map((bank) => (
+                  <MenuItem key={bank.id} value={bank.id}>
+                    {bank.bankName} ({bank.bankCode})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel>User Role</InputLabel>
+              <Select
+                name="role"
+                value={formData.role}
+                label="User Role"
+                onChange={handleChange}
+              >
+                <MenuItem value="CUSTOMER">Customer</MenuItem>
+                <MenuItem value="ADMIN">Administrator</MenuItem>
+                <MenuItem value="EMPLOYEE">Employee</MenuItem>
+              </Select>
+            </FormControl>
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
+              disabled={loading || loadingBanks || !formData.bankId}
             >
-              {loading ? <CircularProgress size={24} /> : 'Register'}
+              {loading ? <CircularProgress size={24} /> : loadingBanks ? 'Loading Banks...' : 'Register'}
             </Button>
             <Box textAlign="center">
               <Link to="/login" style={{ textDecoration: 'none' }}>

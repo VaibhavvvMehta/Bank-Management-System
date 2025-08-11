@@ -1,5 +1,6 @@
 package com.bankmanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -43,12 +44,14 @@ public class Transaction {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "from_account_id")
+    @JsonIgnoreProperties({"outgoingTransactions", "incomingTransactions", "user", "hibernateLazyInitializer", "handler"})
     private Account fromAccount;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "to_account_id")
+    @JsonIgnoreProperties({"outgoingTransactions", "incomingTransactions", "user", "hibernateLazyInitializer", "handler"})
     private Account toAccount;
     
     @Column(precision = 15, scale = 2)

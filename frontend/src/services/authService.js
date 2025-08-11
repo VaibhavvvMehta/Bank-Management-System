@@ -8,6 +8,10 @@ export const register = (userData) => {
   return api.post('/auth/register', userData);
 };
 
+export const registerAdmin = (userData) => {
+  return api.post('/auth/register-admin', userData);
+};
+
 export const getCurrentUser = () => {
   return api.get('/auth/user');
 };

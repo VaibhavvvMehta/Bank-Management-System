@@ -1,9 +1,12 @@
 package com.bankmanagement.controller;
 
 import com.bankmanagement.config.JwtUtil;
+import com.bankmanagement.dto.RegisterRequest;
 import com.bankmanagement.model.Role;
 import com.bankmanagement.model.User;
+import com.bankmanagement.model.Bank;
 import com.bankmanagement.service.UserService;
+import com.bankmanagement.service.BankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +23,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:3002"})
 public class AuthController {
     
     @Autowired
@@ -28,6 +31,9 @@ public class AuthController {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private BankService bankService;
     
     @Autowired
     private JwtUtil jwtUtil;
@@ -60,13 +66,83 @@ public class AuthController {
     }
     
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            user.setRole(Role.CUSTOMER); // Default role
+            User user = new User();
+            user.setUsername(registerRequest.getUsername());
+            user.setPassword(registerRequest.getPassword());
+            user.setEmail(registerRequest.getEmail());
+            user.setFirstName(registerRequest.getFirstName());
+            user.setLastName(registerRequest.getLastName());
+            user.setPhoneNumber(registerRequest.getPhoneNumber());
+            user.setAddress(registerRequest.getAddress());
+            user.setRole(Role.CUSTOMER); // Default role for registration
+            
+            Bank selectedBank = bankService.getBankById(registerRequest.getBankId());
+            if (selectedBank == null) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Invalid bank selection");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+            
+            user.setBank(selectedBank);
             User createdUser = userService.createUser(user);
             
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "User registered successfully");
+            response.put("message", "User registered successfully with " + selectedBank.getBankName());
+            response.put("user", createdUser);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+    
+    @GetMapping("/banks")
+    public ResponseEntity<?> getAvailableBanks() {
+        try {
+            return ResponseEntity.ok(bankService.getAllBanks());
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Failed to fetch banks");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+    
+    @PostMapping("/register-admin")
+    public ResponseEntity<?> registerAdmin(@Valid @RequestBody Map<String, Object> registrationData) {
+        try {
+            User user = new User();
+            user.setUsername((String) registrationData.get("username"));
+            user.setPassword((String) registrationData.get("password"));
+            user.setEmail((String) registrationData.get("email"));
+            user.setFirstName((String) registrationData.get("firstName"));
+            user.setLastName((String) registrationData.get("lastName"));
+            user.setPhoneNumber((String) registrationData.get("phoneNumber"));
+            user.setAddress((String) registrationData.get("address"));
+            
+            // Get role from request - you have manual control
+            String roleString = (String) registrationData.get("role");
+            if (roleString == null || roleString.isEmpty()) {
+                roleString = "CUSTOMER"; // Default to customer if no role specified
+            }
+            
+            Role selectedRole;
+            try {
+                selectedRole = Role.valueOf(roleString.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Invalid role. Must be ADMIN, CUSTOMER, or EMPLOYEE");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+            
+            user.setRole(selectedRole);
+            User createdUser = userService.createUser(user);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User registered successfully with role: " + selectedRole);
             response.put("user", createdUser);
             
             return ResponseEntity.status(HttpStatus.CREATED).body(response);

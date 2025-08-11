@@ -1,5 +1,8 @@
 package com.bankmanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -29,6 +32,7 @@ public class User implements UserDetails {
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
     @Column(nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     
     @NotBlank(message = "Email is required")
@@ -52,10 +56,14 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String address;
     
-    @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bank_id", nullable = false)
+    @JsonIgnore
+    private Bank bank;
     
     @Column(nullable = false)
     private boolean isActive = true;
@@ -67,6 +75,7 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Account> accounts;
     
     public User() {
@@ -118,6 +127,9 @@ public class User implements UserDetails {
     
     public List<Account> getAccounts() { return accounts; }
     public void setAccounts(List<Account> accounts) { this.accounts = accounts; }
+    
+    public Bank getBank() { return bank; }
+    public void setBank(Bank bank) { this.bank = bank; }
     
     // UserDetails interface methods
     @Override

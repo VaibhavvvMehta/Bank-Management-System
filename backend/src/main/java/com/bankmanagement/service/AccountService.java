@@ -2,12 +2,15 @@ package com.bankmanagement.service;
 
 import com.bankmanagement.model.Account;
 import com.bankmanagement.model.AccountStatus;
+import com.bankmanagement.model.AccountType;
+import com.bankmanagement.model.Bank;
 import com.bankmanagement.model.User;
 import com.bankmanagement.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
@@ -20,10 +23,16 @@ public class AccountService {
     @Autowired
     private UserService userService;
     
+    // Get accounts by bank ID
+    public List<Account> getAccountsByBankId(Long bankId) {
+        return accountRepository.findByBankId(bankId);
+    }
+
     public Account createAccount(Account account, Long userId) {
         User user = userService.getUserById(userId);
         account.setUser(user);
-        account.setAccountNumber(generateAccountNumber());
+        account.setBank(user.getBank()); // Set the account's bank to be the same as the user's bank
+        account.setAccountNumber(generateAccountNumber(account.getAccountType(), user.getBank()));
         account.setBalance(BigDecimal.ZERO);
         account.setAccountStatus(AccountStatus.ACTIVE);
         
@@ -124,10 +133,24 @@ public class AccountService {
         return accountRepository.countByUserId(userId);
     }
     
-    private String generateAccountNumber() {
+    private String generateAccountNumber(AccountType accountType, Bank bank) {
         String accountNumber;
+        int year = LocalDate.now().getYear();
+        
+        // Account type codes: 001 for SAVINGS, 002 for BUSINESS
+        String accountTypeCode = accountType == AccountType.SAVINGS ? "001" : "002";
+        
+        // Bank codes: 01 for BANK1, 02 for BANK2
+        String bankCode = bank.getBankCode().equals("BANK1") ? "01" : "02";
+        
         do {
-            accountNumber = "ACC" + System.currentTimeMillis() + new Random().nextInt(1000);
+            // Generate serial number (001-999)
+            int serialNumber = new Random().nextInt(999) + 1;
+            String serialNumberStr = String.format("%03d", serialNumber);
+            
+            // Format: ACC + YEAR + ACCOUNT_TYPE_CODE + BANK_CODE + SERIAL_NUMBER
+            // Example: ACC2025001/01001
+            accountNumber = String.format("ACC%d%s/%s%s", year, accountTypeCode, bankCode, serialNumberStr);
         } while (accountRepository.existsByAccountNumber(accountNumber));
         
         return accountNumber;

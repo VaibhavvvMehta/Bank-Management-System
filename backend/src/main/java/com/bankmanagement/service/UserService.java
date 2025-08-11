@@ -27,6 +27,16 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
     
+    // Get users by bank ID
+    public List<User> getUsersByBankId(Long bankId) {
+        return userRepository.findByBankId(bankId);
+    }
+
+    // Get active users by bank ID
+    public List<User> getActiveUsersByBankId(Long bankId) {
+        return userRepository.findByBankIdAndIsActiveTrue(bankId);
+    }
+
     public User createUser(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new RuntimeException("Username already exists");
