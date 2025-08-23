@@ -467,9 +467,6 @@ The system includes:
    mvn clean package
    ```
 
-### Docker Support (Future Enhancement)
-
-Plans for containerization with Docker and Docker Compose.
 
 ## 🎯 Key Features Implemented
 
@@ -484,18 +481,7 @@ Plans for containerization with Docker and Docker Compose.
 ✅ **Error Handling**  
 ✅ **Security Best Practices**  
 
-## 🔮 Future Enhancements
 
-- 📱 Mobile app development
-- 📧 Email notifications
-- 📊 Advanced reporting and analytics
-- 🔔 Real-time notifications
-- 💳 Card management
-- 🏦 Loan management
-- 📄 Statement generation
-- 🔐 Two-factor authentication
-- 🌐 Multi-language support
-- 📈 Investment tracking
 
 ## 🤝 Contributing
 
@@ -509,160 +495,5 @@ Plans for containerization with Docker and Docker Compose.
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- Spring Boot community for excellent documentation
-- Material-UI team for the beautiful component library
-- React team for the powerful frontend framework
-
----
-
 **Made with ❤️ for modern banking solutions**
-   spring.datasource.password=your_mysql_password
-   ```
 
-### 2. Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies and run the application:
-   ```bash
-   mvn clean install
-   mvn spring-boot:run
-   ```
-
-   The backend will start on `http://localhost:8080`
-
-### 3. Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm start
-   ```
-
-   The frontend will start on `http://localhost:3000`
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `GET /api/auth/user` - Get current user
-- `PUT /api/auth/change-password` - Change password
-
-### Accounts (Future Implementation)
-- `GET /api/customer/accounts` - Get user accounts
-- `POST /api/customer/accounts` - Create new account
-- `GET /api/customer/accounts/{id}` - Get account by ID
-- `PUT /api/customer/accounts/{id}` - Update account
-- `DELETE /api/customer/accounts/{id}` - Delete account
-
-### Transactions (Future Implementation)
-- `GET /api/customer/transactions` - Get user transactions
-- `POST /api/customer/transactions/deposit` - Create deposit
-- `POST /api/customer/transactions/withdrawal` - Create withdrawal
-- `POST /api/customer/transactions/transfer` - Create transfer
-
-## User Roles
-
-- **CUSTOMER**: Regular bank customers
-- **EMPLOYEE**: Bank employees with additional privileges
-- **ADMIN**: System administrators with full access
-
-## Default Credentials
-
-The system automatically creates default admin accounts during initialization:
-
-### Admin Accounts:
-- **Username**: `bank1admin`
-- **Password**: `admin123`
-- **Role**: ADMIN (Bank1 Administrator)
-
-- **Username**: `bank2admin`  
-- **Password**: `admin123`
-- **Role**: ADMIN (Bank2 Administrator)
-
-### To access the Admin Panel:
-1. Go to the application at `http://localhost:3002`
-2. Click the account icon and log out if already logged in
-3. Log in with admin credentials (bank1admin/admin123)
-4. Navigate to the "Admin" section to view and manage system data
-
-**Note**: All currency values are displayed in Indian Rupees (₹).
-
-## Project Structure
-
-```
-bank-management-system/
-├── backend/
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   │   └── com/
-│   │   │   │       └── bankmanagement/
-│   │   │   │           ├── config/      # Security & JWT configuration
-│   │   │   │           ├── controller/  # REST controllers
-│   │   │   │           ├── model/       # Entity classes
-│   │   │   │           ├── repository/  # Data access layer
-│   │   │   │           └── service/     # Business logic layer
-│   │   │   └── resources/
-│   │   │       └── application.properties
-│   │   └── pom.xml
-├── frontend/
-│   ├── src/
-│   │   ├── components/   # Reusable React components
-│   │   ├── pages/        # Page components
-│   │   ├── services/     # API service functions
-│   │   ├── context/      # React context providers
-│   │   └── App.js
-│   └── package.json
-└── README.md
-```
-
-## Development Notes
-
-1. **Security**: The application uses JWT tokens for authentication. Tokens are stored in localStorage.
-
-2. **Database**: Tables are automatically created by Spring Boot JPA when the application starts.
-
-3. **CORS**: The backend is configured to allow requests from `http://localhost:3000`.
-
-4. **Error Handling**: Basic error handling is implemented for authentication and API calls.
-
-## Future Enhancements
-
-- Complete implementation of account management features
-- Transaction history and reporting
-- Email notifications
-- Account statements generation
-- Advanced admin features
-- Mobile responsiveness improvements
-- Unit and integration tests
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License.
-=======
-# Bank-Management-System
->>>>>>> d830beeeaea4ca18ec81aff2d1ce29b1642ac18b
