@@ -134,7 +134,7 @@ Before setting up the project, ensure you have:
    npm start
    ```
 
-   The frontend will start on `http://localhost:3002`
+   The frontend will start on `http://localhost:3000`
 
 ## 🔑 Default Credentials
 
@@ -150,7 +150,7 @@ The system automatically creates default admin accounts during initialization:
 - **Role**: ADMIN (Bank2 Administrator)
 
 ### 📋 How to Access Admin Panel:
-1. Go to the application at `http://localhost:3002`
+1. Go to the application at `http://localhost:3000`
 2. Click the account icon and log out if already logged in
 3. Log in with admin credentials (`bank1admin` / `admin123`)
 4. Navigate to the "Admin" section to view and manage system data
